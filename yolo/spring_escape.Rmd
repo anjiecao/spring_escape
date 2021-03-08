@@ -1,0 +1,37 @@
+---
+title: "spring escape planning"
+author: "anjie"
+date: "3/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(googlesheets4) # package for reading data in spreadsheet directly into R
+library(here) # pakcage for managing paths
+
+
+RAW_DATA_GOOGLE_SHEET_ID <- "1MOlxQdnUBsobbyM7XbA0dLAG-RjhS4GgARCv3qRvAMI"
+SHEET_NAME <- "accomodations"
+
+read_raw_data <- function(sheet_id, sheet_name){
+
+  df.accomodations <- read_sheet(sheet_id, sheet_name,
+
+                        col_types = "cddddcccccdcc")
+  
+  return(df.accomodations)
+}
+
+df.accomodations <- read_raw_data(RAW_DATA_GOOGLE_SHEET_ID, SHEET_NAME)
+
+```
+
+```{r}
+df.accomodations 
+```
+

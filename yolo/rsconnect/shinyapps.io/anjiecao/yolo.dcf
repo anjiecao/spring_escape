@@ -1,0 +1,13 @@
+name: yolo
+title: yolo
+username:
+account: anjiecao
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3756417
+bundleId: 4317597
+url: https://anjiecao.shinyapps.io/yolo/
+when: 1615231082.02609
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: spring_escape.Rmd

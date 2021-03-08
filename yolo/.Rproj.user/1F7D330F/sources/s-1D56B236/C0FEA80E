@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1615227829915.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2101125489",
+    "id" : "C0FEA80E",
+    "lastKnownWriteTime" : 1615228548,
+    "last_content_update" : 1615228777117,
+    "path" : "~/Desktop/spring_escape/yolo/spring_escape.Rmd",
+    "project_path" : "spring_escape.Rmd",
+    "properties" : {
+        "cursorPosition" : "30,0",
+        "last_setup_crc32" : "",
+        "scrollLine" : "10",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
