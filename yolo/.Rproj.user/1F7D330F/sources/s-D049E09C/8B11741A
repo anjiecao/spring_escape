@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1615258921856.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "8B11741A",
+    "lastKnownWriteTime" : 1615046013,
+    "last_content_update" : 1615046013,
+    "path" : "~/Downloads/6_linear_mixed_effects_models/6_linear_mixed_effects_model.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "3,20",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

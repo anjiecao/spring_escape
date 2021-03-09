@@ -5,9 +5,9 @@ account: anjiecao
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3756417
-bundleId: 4318251
+bundleId: 4319084
 url: https://anjiecao.shinyapps.io/yolo/
-when: 1615241430.77978
+when: 1615260205.0162
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: spring_escape.Rmd

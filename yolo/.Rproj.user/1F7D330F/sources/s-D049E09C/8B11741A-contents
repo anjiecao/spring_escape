@@ -1,0 +1,330 @@
+---
+title: "anjie cao"
+subtitle: "The names of the people I have worked with go here"
+date: "`r Sys.time()`"
+output: 
+  pdf_document
+urlcolor: blue
+---
+
+```{r include=FALSE, eval=TRUE}
+library("knitr")
+library("janitor")     
+library("broom.mixed") 
+library("lme4")
+library("afex")
+library("tidyverse")
+
+theme_set(theme_classic())
+```
+
+# Instructions
+
+This homework is due by __Thursday, March 11th, 8:00pm__. 
+
+**Note**:
+
+- When asked to report results, please do so like you would in a scientific article (see examples from lectures,
+as well as in ‘Reporting Results.pdf’ on Canvas under Files > papers).
+- Some code chunks contain some skeleton code. The code chunk option for these chunks is set to `eval=F` so that knitting the RMarkdown document doesn't throw any errors. Make sure to set these chunks to `eval=T` when you knit your homework, so that your calculations are shown in the pdf.
+- Make sure to show the results of your calculations in the knitted pdf, for example, by using the `print()` function at the end of a code chunk. 
+- Some questions ask for a short written response as indicated by this prompt: **Your answer:** 
+
+# Part 1 (5 points)
+
+## Load and visualize data
+
+Here we have (fake) data on measurements of extraversion from students nested within classes. Extraversion is one of the big-5 personality traits. We would like to know whether a student's openness and agreeableness predicts their social behavior (extraversion). We know the data are non-independent because the students were sampled from 4 different classes, and we might expect that students from the same class are more similar to each other than students from different classes. We need to take this dependence into account when modeling our data.
+
+First, let's Load the data set. 
+
+```{r warning=F, message=F}
+df.class = read_csv("data/extra_class.csv")
+```
+
+### __1.1__ (1 points)
+
+Below is a plot that shows the relationship between openness (`open`) on the x-axis and extraversion (`extra`) on the y-axis for you, separated by class ("a"-"d"). Briefly describe the plot. 
+
+```{r, message=FALSE}
+ggplot(data = df.class,
+       mapping = aes(x = open,
+                     y = extra)) +
+  geom_point(alpha = .5) + 
+  geom_smooth(method = "lm") + 
+  facet_wrap(~ class)
+```
+
+> There isn't a clear relationship between openness and extraversion across the four classess. The spread of openness is quite similar across four classess, but the class differs in its spread on extraversion.  
+
+
+## Consider what statistical model to use and why 
+
+### __1.2__ (1 point)
+
+Based on the `df.class` data, if you want to know whether extraversion can be predicted by openness and agreeableness, you should run a linear mixed effects model (rather than a linear regression model). For this research question, what factors are the fixed effects, and what factor(s) should we include as the random effects? Explain the difference between random effects and fixed effects in a sentence or two. 
+
+ > Openness and agreeableness are the fixed effects. Class is the random effects. In the current example, fixed effects are assumed to be constants across all classes, but the random effects take into considerations the variations across classes. 
+
+
+## Fitting, comparing, and interpreting models 
+
+### __1.3__ (1 point)
+
+Fit a model to the data: a linear mixed effects model (`lmer()`) that predicts extraversion as a function of openness but also takes into account that students from different classes may differ in their baseline level of extraversion (i.e. a linear mixed effects model with _random intercepts_). 
+
+```{r}
+### YOUR CODE HERE ###
+
+fit.open <- lmer(extra ~ open + (1|class), 
+     data = df.class, 
+     REML = FALSE)
+######################
+```
+
+
+### __1.4__ (1 point)
+
+Add a fixed effect of agreeableness (`agree`) to the linear mixed effects model (with random intercepts for `class`). Is a model that takes both aggreeableness and openness into account when trying to predict extraversion significantly better than a mixed effects model that only considers openness? 
+
+> Tip: You can use a likelihood ratio test (via the `anova()` function), or use the `mixed()` function from the "afex" package setting `method = "LR"`.
+
+```{r}
+### YOUR CODE HERE ###
+
+fit.open_and_agree <- lmer(extra ~ open + agree + (1|class), 
+     data = df.class, 
+     REML = FALSE)
+
+anova(fit.open, fit.open_and_agree)
+######################
+```
+
+> Yes, the model that takes both agreeableness and openness is significantly better than a mixed effects model that only consider openness $\chi$^2^ = `1`, p < 0.001.
+
+
+### __1.5__ (1 point)
+
+In addition to the random intercept, add random slopes of agreeableness to the linear mixed effects model that has both agreeableness and openness as fixed effects. Fit the model and compare it to the model without random slopes. Is adding the random slopes worth it? 
+
+```{r}
+### YOUR CODE HERE ###
+fit.open_and_agree_random_slope <- lmer(extra ~ open + agree + (1 + agree|class), 
+     data = df.class, 
+     REML = FALSE)
+
+anova(fit.open_and_agree, fit.open_and_agree_random_slope)
+######################
+```
+
+> Yes, adding random slopes is worth it. $\chi$^2^ = `2`, p < 0.001.
+
+
+# Part 2 (5 points)
+
+A recent paper in Psychological Science reported that children as young as 4 years of age use probability to infer how good an outcome is. You can check out the original paper [here](https://journals.sagepub.com/doi/full/10.1177/0956797619895282#_i25). They share the data on [OSF](https://osf.io/e3a2k/) so we can try to reproduce their analysis using the tools we have learned in class.
+
+In Experiment 4, the `Mostly Yummy` vs. `Mostly Yucky` condition was manipulated within participants (and the order was counterbalanced). At the end of each experiment, children gave a rating from -3 to +3 to either a `happiness` question ("How does the girl feel about the gumballs that she got?") or a `quality` question ("How good was that?"). The type of the question manipulated between participants. You can read the experiment procedures in more details in the figure below.
+
+![](figure/Doan_Fig6.png){width=400px}
+
+The authors ran a 2 (condition: mostly yummy, mostly yucky) × 2 (judgment type: happiness, quality) mixed ANOVA on the rating data. They reported that there was a significant condition-by-judgment-type interaction, $F(1, 78) = 5.33, p = .024, \eta_p^2 = .064$. There were no main effects of condition, $F(1, 78) = 2.11, p = .150, \eta_p^2 = .026$, or judgment type, $F(1, 78) = 1.67, p = .200, \eta_p^2 = .021$. Below is a plot showing the results from the paper.
+
+![](figure/Doan_Fig7.png){width=400px}
+
+### __2.1__ (1 point)
+
+First, we read in the data. Next, create a column called `participant`, naming each row however you'd like (e.g., `sub_1`, `sub_2`, etc). Note that, in the raw data, each participant is a separate row, but the responses to the within-subject manipulation are in the same row. Then, continue wrangling the data so that `mostly yummy rating` and `mostly yucky rating` are in a separate row for each child. Use the `pivot_longer()` function to do so. You can call the column that contains the condition name `condition`, and the column that contains the ratings `rating`.
+
+```{r warning=F, message=F}
+# read data
+df.children = read_csv("data/experiment4.csv") 
+
+### YOUR CODE HERE ###
+
+df.children <- df.children %>% 
+  mutate(
+    participant =  paste0("sub_", row_number())
+  ) %>% 
+  pivot_longer(
+    cols = c("Mostly Yummy Rating", "Mostly Yucky Rating"), 
+    names_to = "condition", 
+    values_to = "rating"
+  )
+
+# wrangle data
+
+######################
+```
+
+### __2.2__ (2 points)
+
+Test the interaction effect first. Build an lmer model without the interaction term and another model with the interaction term. The model should have random intercepts for each participant. Use `anova()` to compare the two models and report whether there is a significant interaction between `question_type` and `condition`.
+
+> Tip: You can again use the `mixed()` function from the "afex" package if you prefer. 
+
+```{r}
+### YOUR CODE HERE ###
+fit.no_interaction <- lmer(rating ~ `Question Type` + condition + (1 | participant), 
+                           data = df.children, 
+                           REML = FALSE)
+
+fit.interaction <- lmer(rating ~ `Question Type` * condition + (1 | participant), 
+                        data = df.children, 
+                        REML = FALSE)
+
+anova(fit.no_interaction, fit.interaction)
+
+######################
+```
+> Yes, there is an significant interaction effect.  $\chi$^2^ = `1`, p < 0.02.
+
+
+### __2.3__ (2 points)
+
+Simulate data from the lmer model with interaction you built in 2.2 (using `simulate()`) and visualize the simulated data with the true data. Set the color of the true data points to black and that of the simulated data points to red with `alpha = .3`. Here is an example of what this plot could look like: 
+
+```{r, out.width="50%"}
+include_graphics("figure/part2.4_plot.png")
+```
+
+
+
+By visualizing the simulated data against the true data, does the simulated data capture the data pattern of the true data well? In what aspects does the model not capture the data well? What model assumptions are violated?
+
+```{r}
+set.seed(1)
+
+### YOUR CODE HERE ###
+
+df.children %>% 
+  ggplot(aes(x = condition,  y = rating)) + 
+  geom_point(position = position_jitter(width = 0.2), 
+             alpha = 0.3) + 
+  geom_point(aes(x = condition,  y = fit.interaction %>% simulate() %>% pull(sim_1)), 
+             position = position_jitter(width = 0.2), 
+             alpha = 0.3, 
+             color = "red")+ 
+  scale_y_continuous(breaks = seq(-2.5, 5, 2.5))+
+  facet_wrap(~`Question Type`) 
+
+######################
+```
+
+> Not it doesn't. The model doesn't capture the range of the possible ratings (The range should be -3 to 3 but it clearly go beyond 5). The assumptions that Y is continuous is violated in the original model because the ratings were actually discrete.  
+
+
+# Part 3 (5 points)
+
+A study at Stanford tested whether negative images (e.g., gunshot) decrease pupil size compared to neutral images (e.g., a table) in human adults. They designed an image-viewing experiment and measured participants' pupil size in each trial using an eye-tracker. 
+
+The experiment had 40 images (about half neutral and half negative) but not every participant finished the whole experiment (which is common in human research :( ). Also, the images in an experiment were sampled from a larger image set. 
+
+### __3.1__ (1 point)
+
+Visualize the data of pupil size and image type for some participants (let's just plot the data for the participants whose participant ID are smaller or equal to 1190. There should be 9 of them). Pick 2 participants (participant 1002, and participant 1124) as examples to show that they didn't see the same images. 
+
+> Tip: Here is one way to show that the participants viewed different images: filter out these participants first, then arrange the data frame according to `imageFile`, group by participant, and then use the slice_head() function to just show the first 5 rows for each participant.  
+
+```{r warning=F, message=F}
+# read data
+df.pupil_stanford = read_csv("data/pupil_size_stanford.csv")
+
+### YOUR CODE HERE ###
+
+# visualize data of some participants (participant ID <= 1190)
+
+df.pupil_stanford %>% 
+  filter(participant < 1190 | participant == 1190) %>% 
+  ggplot(aes(x = image_type, y = pupil_size)) + 
+  geom_point(position = position_jitter(width = 0.2), 
+             alpha = 0.3)
+
+# check the images participants viewed
+df.pupil_stanford %>% 
+  filter(participant == 1002 | participant == 1124) %>% 
+  arrange(imageFile) %>% 
+  group_by(participant) %>% 
+  slice_head(n = 5)
+
+######################
+```
+
+
+### __3.2__ (3 points)
+
+Build a model to test the research question that negative images reduce pupil size compared to neutral pictures, and use the `summary()` function to print out the model result. Justify your choice of fixed effects and random effects in the model. For example, consider questions like:
+  - What are the fixed effects?
+  - Random intercepts? Random slopes?
+  - Nested or crossed random effects?
+
+```{r}
+ ### YOUR CODE HERE ###
+
+lmer(
+  formula = pupil_size ~ image_type +  (1 + image_type | participant) + (1 | imageFile), 
+  data = df.pupil_stanford
+) %>% 
+  summary()
+
+######################
+```
+
+> Because the question is about whether negative images reduce pupile size compared to neutral pictures, the fixed effects is the image_type. Random intercepts are participant and imageFile, because the baseline pupile size might differ across participants, and there might be some variations across image files. I also included a random slope for participant because different participants might have different reactions toward image type.  
+
+
+### __3.3__ (1 point)
+
+Another lab at Berkeley did the exact same experiment and collected some more data. Now, build a model to test the same research question on a combined data set from both Stanford and Berkeley. Use `lab` as another fixed effect in the model, and also include an interaction between `image_type` and `lab`. What do you find? Are there significant main effects of `image_type` and `lab`? Is there an interaction effect? 
+
+> Tip: The `mixed()` function from the "afex" package will be useful here again (and it may take a while to run ...). 
+
+```{r message=F}
+# read data
+df.pupil_berkeley = read_csv("data/pupil_size_berkeley.csv")
+
+# merge data
+df.pupil = bind_rows(df.pupil_stanford, df.pupil_berkeley)
+
+### YOUR CODE HERE ###
+
+ afex::mixed(
+  formula = pupil_size ~ lab * image_type +  (1 + image_type | participant) + (1 | imageFile), 
+  data = df.pupil
+) 
+ 
+
+
+
+######################
+```
+
+> There is a significant main effect of image type (F(1,64.44) = 23.14, p <.001)
+
+
+\clearpage
+# Grading Rubric
+
+1. Part 1 (5 pts)
+    1. (1 pt)
+    2. (1 pt)
+    3. (1 pt)
+    4. (1 pt)
+    5. (1 pt)
+2. Part 2 (5 pts)
+    1. (1 pt)
+    2. (2 pts)
+    3. (2 pts)
+3. Part 3 (5 pts)
+    1. (1 pt)
+    2. (3 pts)
+    3. (1 pt)   
+
+
+# Session info 
+
+Information about this R session including which version of R was used, and what packages were loaded. 
+
+```{r}
+sessionInfo()
+```
